@@ -11,4 +11,3 @@ Instaling solver is a small project that automates the process of answering inst
 ## Usage
 `python instaling.py  [username] [password] [number of sessions]`
 
-You can also download the precompiled version, but it still requires the geckodriver executable (or in case of linux the geckodriver package) and the firefox browser.
