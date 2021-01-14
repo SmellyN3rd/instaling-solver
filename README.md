@@ -1,5 +1,5 @@
 ## About the project
-Instaling solver is a small project that automates the process of answering instaling questions.
+instaling-solver is a small project that automates the process of answering [instaling.pl](https://instaling.pl/) questions.
 
 
 ## dependencies
