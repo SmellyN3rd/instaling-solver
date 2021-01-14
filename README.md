@@ -22,3 +22,6 @@ instaling-solver is a small project that automates the process of answering [ins
 --sessions=                        specify the amount of sessions to complete
 --file=                           specify the file to which to read/write to
 --minimize                         start the program with a minimized browser
+
+# Showcase
+<img src="https://media.giphy.com/media/njjiYq0zcxNpkfeV02/giphy.gif" >
