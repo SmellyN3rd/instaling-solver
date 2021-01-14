@@ -159,9 +159,17 @@ if __name__ == "__main__":
         answers = lists[1].split(';')
         del questions[-1]
         del answers[-1]
+        if 'None' in questions:
+            del answers[questions.index('None')]
+            del questions[questions.index('None')]
+        if 'None' in answers:
+            del answers[answers.index('None')]
+            del questions[answers.index('None')]
         print("read " + str(len(questions)) + " words from file " + file)
     except IOError:
         pass
+
+
     webdriver = webdriver_generate()
     login(webdriver, username, password)
 
