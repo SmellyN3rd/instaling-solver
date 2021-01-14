@@ -128,6 +128,7 @@ if __name__ == "__main__":
     answers = ['Deutsch']
     sessions_to_do = 1
     file = "instaling.words"
+    webdriver = webdriver_generate()
 
     print("instaling solver by " + __author__)
 
@@ -170,7 +171,6 @@ if __name__ == "__main__":
         pass
 
 
-    webdriver = webdriver_generate()
     login(webdriver, username, password)
 
     while True:
