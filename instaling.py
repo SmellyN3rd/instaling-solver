@@ -178,6 +178,9 @@ def learn(driver, questions, answers):
 def answer(driver, questions, answers):
     dismiss_popup(driver)
 
+    questions = list(dict.fromkeys(questions))
+    answers = list(dict.fromkeys(answers))
+
     if question(driver) in questions and driver.find_element_by_id("answer").is_displayed():
         WebDriverWait(driver, 5).until(ec.presence_of_element_located((By.ID, "answer")))
         if driver.find_element_by_id("answer").is_displayed() and question(driver) in questions:
