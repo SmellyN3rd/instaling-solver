@@ -18,11 +18,11 @@ instaling-solver is a small project that automates the process of answering [ins
 ## Options
 option        | description
 ------------- | -------------
--user -u        | specify the instaling account to use
--password -p    | password for the given account
--sessions -s    | specify the amount of sessions to complete
--file -f        | specify the file to which to read/write to
--minimize -m    | start the program with a minimized browser
+--user -u        | specify the instaling account to use
+--password -p    | password for the given account
+--sessions -s    | specify the amount of sessions to complete
+--file -f        | specify the file to which to read/write to
+--minimize -m    | start the program with a minimized browser
 
 # Showcase
 <img src="https://media.giphy.com/media/njjiYq0zcxNpkfeV02/giphy.gif" >
