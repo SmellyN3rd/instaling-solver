@@ -18,6 +18,64 @@ def webdriver_generate():
     return webdriver.Firefox(firefox_profile=profile)
 
 
+def read_words(file):
+    try:
+        lists = open(file, 'r').read().split('\n')
+        questions = lists[0].split(';')
+        answers = lists[1].split(';')
+        del questions[-1]
+        del answers[-1]
+        print("read " + str(len(questions)) + " words from file " + file)
+    except IOError:
+        questions = ['null']
+        answers = ['null']
+    return {"questions": questions, "answers": answers}
+
+
+def write_fiile(questions, answers, file):
+    open('geckodriver.log', 'w')
+    open(file, 'w')
+    for i in questions:
+        open(file, 'a').write(str(i) + ';')
+    open(file, 'a').write('\n')
+    for j in answers:
+        open(file, 'a').write(str(j) + ';')
+
+def argument_parse():
+    parsed = {"username": "", "password": "", "file": "instaling.words", "sessions_to_do": 1}
+
+    if "--help" in argv:
+        print("usage: " + argv[0] + " [options]\n")
+        print("options:")
+        print("--user=      your instaling username")
+        print("--password=  yor instaling password")
+        print("--sessions=  desired number of instaling sessions to complete")
+        print("--file=      file with the saved instaling words")
+        print("--minimize   start the program minimized")
+        print("--help       display this help message")
+        exit()
+
+    for argument in argv:
+        if "--user=" in argument:
+            parsed["username"] = argument.replace("--user=", "")
+        if "--password=" in argument:
+            parsed["password"] = argument.replace("--password=", "")
+        if "--sessions=" in argument:
+            parsed["sessions_to_do"] = int(argument.replace("--sessions=", ""))
+        if "--file=" in argument:
+            parsed["file"] = argument.replace("--file=", "")
+        if "--minimize" in argument:
+            webdriver.minimize_window()
+
+    if parsed["username"] == "":
+        print("please specify what user to use")
+        exit()
+    if parsed["password"] == "":
+        print("please type the password for the user " + parsed["username"])
+        exit()
+    return parsed
+
+
 def login(driver, username, password):
     driver.get('https://instaling.pl/login')
     driver.find_element_by_id("log_email").send_keys(username)
@@ -45,6 +103,7 @@ def login(driver, username, password):
 
 
 def question(driver):
+    WebDriverWait(driver, 5).until(ec.presence_of_element_located((By.ID, "question")))
     if driver.find_element_by_id("check").is_displayed() and driver.find_element_by_id("question").is_displayed():
         for text in driver.find_element_by_id('question').text.split('\n'):
             if '_' not in text:
@@ -52,41 +111,62 @@ def question(driver):
         return text
 
 
-def session_end(driver):
-    driver.find_element_by_id("return_mainpage").click()
-    while True:
-        try:
-            driver.find_element_by_id("session_button").click()
-            break
-        except UnexpectedAlertPresentException or NoSuchElementException:
-            continue
+def dismiss_popup(driver):
+    if driver.find_element_by_id("dont_know_new").is_displayed():
+        driver.find_element_by_id("dont_know_new").click()
+        driver.find_element_by_id("skip").click()
+        print("dismissed a popup")
+    if driver.find_element_by_id("start_session_button").is_displayed():
+        driver.find_element_by_id("start_session_button").click()
 
 
-def learn(driver):
+def session_end(driver, sessions_to_do, file, questions, answers):
+    if webdriver.find_element_by_id("return_mainpage").is_displayed():
+        WebDriverWait(driver, 5).until(ec.element_to_be_clickable((By.ID, "return_mainpage")))
+        sessions_to_do = sessions_to_do - 1
+        if sessions_to_do == 0:
+            print("completed all sesions")
+            write_fiile(questions, answers, file)
+            webdriver.close()
+            exit()
+        print(str(sessions_to_do) + " sessions left\n")
+        driver.find_element_by_id("return_mainpage").click()
+        while True:
+            try:
+                driver.find_element_by_id("session_button").click()
+                break
+            except UnexpectedAlertPresentException or NoSuchElementException:
+                continue
+    return sessions_to_do
+
+
+def learn(driver, questions, answers):
     if question(driver) not in questions:
-        questions.append(question(driver))
+        tmp = [question(driver)]
         while driver.find_element_by_id("check").is_displayed():
             driver.find_element_by_id("check").click()
         WebDriverWait(driver, 5).until(ec.presence_of_element_located((By.ID, "word")))
         if driver.find_element_by_id("word").is_displayed():
-            answers.append(driver.find_element_by_id("word").text)
-        else:
-            del questions[-1]
+            tmp.append(driver.find_element_by_id("word").text)
         while driver.find_element_by_id("next_word").is_displayed():
             driver.find_element_by_id("next_word").click()
+        try:
+            if None not in tmp:
+                answers.append(tmp[1])
+                questions.append(tmp[0])
+                print("learnt a new word: " + tmp[0] + " - " + tmp[1])
+        except IndexError:
+            pass
+        return {"questions": questions, "answers": answers}
 
 
-def answer(driver):
-    if driver.find_element_by_id("dont_know_new").is_displayed():
-        driver.find_element_by_id("dont_know_new").click()
-        driver.find_element_by_id("skip").click()
-    if driver.find_element_by_id("start_session_button").is_displayed():
-        driver.find_element_by_id("start_session_button").click()
+def answer(driver, questions, answers):
+    dismiss_popup(driver)
 
-    if question(driver) in questions:
+    if question(driver) in questions and driver.find_element_by_id("answer").is_displayed():
         WebDriverWait(driver, 5).until(ec.presence_of_element_located((By.ID, "answer")))
         if driver.find_element_by_id("answer").is_displayed() and question(driver) in questions:
-            print(question(driver) + ' - ' + answers[questions.index(question(driver))])
+            print("answered: " + question(driver) + ' - ' + answers[questions.index(question(driver))])
             for letter in answers[questions.index(question(driver))]:
                 if letter == 'ä':
                     driver.find_elements_by_class_name("special_character_button")[0].click()
@@ -116,78 +196,22 @@ def answer(driver):
         while driver.find_element_by_id("next_word").is_displayed():
             driver.find_element_by_id("next_word").click()
     else:
-        learn(driver)
+        dismiss_popup(driver)
+        return learn(driver, questions, answers)
+    return {"questions": questions, "answers": answers}
 
 
 if __name__ == "__main__":
-    global questions
-    global answers
-    username = " "
-    password = " "
-    questions = ['język niemiecki']
-    answers = ['Deutsch']
-    sessions_to_do = 1
-    file = "instaling.words"
+    settings = argument_parse()
+    lists = read_words(settings["file"])
     webdriver = webdriver_generate()
-
     print("instaling solver by " + __author__)
-
-    for argument in argv:
-        if "--user=" in argument:
-            username = argument.replace("--user=", "")
-        if "--password=" in argument:
-            password = argument.replace("--password=", "")
-        if "--sessions=" in argument:
-            sessions_to_do = int(argument.replace("--sessions=", ""))
-        if "--file=" in argument:
-            file = argument.replace("--file=", "")
-        if "--minimize" in argument:
-            webdriver.minimize_window()
-        if "--help" in argument:
-            print("usage: " + argv[0] + " [options]\n")
-            print("options:")
-            print("--user=      your instaling username")
-            print("--password=  yor instaling password")
-            print("--sessions=  desired number of instaling sessions to complete")
-            print("--file=      file with the saved instaling words")
-            print("--minimize   start the program minimized")
-            print("--help       display this help message")
-            exit()
-
-    try:
-        lists = open(file, 'r').read().split('\n')
-        questions = lists[0].split(';')
-        answers = lists[1].split(';')
-        del questions[-1]
-        del answers[-1]
-        if 'None' in questions:
-            del answers[questions.index('None')]
-            del questions[questions.index('None')]
-        if 'None' in answers:
-            del answers[answers.index('None')]
-            del questions[answers.index('None')]
-        print("read " + str(len(questions)) + " words from file " + file)
-    except IOError:
-        pass
-
-
-    login(webdriver, username, password)
-
+    login(webdriver, settings["username"], settings["password"])
     while True:
-        if webdriver.find_element_by_id("return_mainpage").is_displayed():
-            sessions_to_do = sessions_to_do - 1
-            if sessions_to_do == 0:
-                print("completed all sesions")
-                open('geckodriver.log', 'w')
-                open(file, 'w')
-                for i in questions:
-                    open(file, 'a').write(str(i) + ';')
-                open(file, 'a').write('\n')
-                for j in answers:
-                    open(file, 'a').write(str(j) + ';')
-                webdriver.close()
-                exit()
-            print(str(sessions_to_do) + " sessions left\n")
-            session_end(webdriver)
-
-        answer(webdriver)
+        try:
+            lists = answer(webdriver, lists["questions"], lists["answers"])
+            settings["sessions_to_do"] = session_end(webdriver, settings["sessions_to_do"], settings["file"],
+                                                     lists["questions"], lists["answers"])
+        except TypeError:
+            print("an error occurred. reloading the wordlist")
+            lists = read_words(settings["file"])
