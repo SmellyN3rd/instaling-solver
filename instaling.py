@@ -7,6 +7,7 @@ from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException, ElementNotInteractableException, \
     UnexpectedAlertPresentException, NoSuchElementException
 import geckodriver_autoinstaller
+import configparser
 
 __author__ = "SmellyN3rd"
 
@@ -41,31 +42,45 @@ def write_fiile(questions, answers, file):
     for j in answers:
         open(file, 'a').write(str(j) + ';')
 
-def argument_parse():
+
+def argument_parse(driver):
     parsed = {"username": "", "password": "", "file": "instaling.words", "sessions_to_do": 1}
 
     if "--help" in argv:
         print("usage: " + argv[0] + " [options]\n")
         print("options:")
-        print("--user=      your instaling username")
-        print("--password=  yor instaling password")
-        print("--sessions=  desired number of instaling sessions to complete")
-        print("--file=      file with the saved instaling words")
-        print("--minimize   start the program minimized")
-        print("--help       display this help message")
+        print("--user       -f      your instaling username")
+        print("--password   -p      yor instaling password")
+        print("--sessions   -s      desired number of instaling sessions to complete")
+        print("--file       -f      file with the saved instaling words")
+        print("--minimize   -m      start the program minimized")
+        print("--help               display this help message")
         exit()
+    try:
+        config = configparser.ConfigParser()
+        config.read("config.ini")
+        if "username" in config["settings"]:
+            parsed["username"] = config["settings"]["username"]
+        if "password" in config["settings"]:
+            parsed["password"] = config["settings"]["password"]
+        if "sessions_to_do" in config["settings"]:
+            parsed["sessions_to_do"] = int(config["settings"]["sessions_to_do"])
+        if "file" in config["settings"]:
+            parsed["file"] = config["settings"]["file"]
+    except KeyError:
+        pass
 
-    for argument in argv:
-        if "--user=" in argument:
-            parsed["username"] = argument.replace("--user=", "")
-        if "--password=" in argument:
-            parsed["password"] = argument.replace("--password=", "")
-        if "--sessions=" in argument:
-            parsed["sessions_to_do"] = int(argument.replace("--sessions=", ""))
-        if "--file=" in argument:
-            parsed["file"] = argument.replace("--file=", "")
-        if "--minimize" in argument:
-            webdriver.minimize_window()
+    for argument in range(len(argv)):
+        if "--user" == argv[argument] or "-u" == argv[argument]:
+            parsed["username"] = argv[argument + 1]
+        if "--password" == argv[argument] or "-p" == argv[argument]:
+            parsed["password"] = argv[argument + 1]
+        if "--sessions" == argv[argument] or "-s" == argv[argument]:
+            parsed["sessions_to_do"] = int(argv[argument + 1])
+        if "--file" == argv[argument] or "-f" == argv[argument]:
+            parsed["file"] = argv[argument + 1]
+        if "--minimize" == argv[argument] or "-m" == argv[argument]:
+            driver.minimize_window()
 
     if parsed["username"] == "":
         print("please specify what user to use")
@@ -157,7 +172,7 @@ def learn(driver, questions, answers):
                 print("learnt a new word: " + tmp[0] + " - " + tmp[1])
         except IndexError:
             pass
-        return {"questions": questions, "answers": answers}
+    return {"questions": questions, "answers": answers}
 
 
 def answer(driver, questions, answers):
@@ -196,22 +211,17 @@ def answer(driver, questions, answers):
         while driver.find_element_by_id("next_word").is_displayed():
             driver.find_element_by_id("next_word").click()
     else:
-        dismiss_popup(driver)
         return learn(driver, questions, answers)
     return {"questions": questions, "answers": answers}
 
 
 if __name__ == "__main__":
-    settings = argument_parse()
-    lists = read_words(settings["file"])
     webdriver = webdriver_generate()
+    settings = argument_parse(webdriver)
+    lists = read_words(settings["file"])
     print("instaling solver by " + __author__)
     login(webdriver, settings["username"], settings["password"])
     while True:
-        try:
-            lists = answer(webdriver, lists["questions"], lists["answers"])
-            settings["sessions_to_do"] = session_end(webdriver, settings["sessions_to_do"], settings["file"],
-                                                     lists["questions"], lists["answers"])
-        except TypeError:
-            print("an error occurred. reloading the wordlist")
-            lists = read_words(settings["file"])
+        lists = answer(webdriver, lists["questions"], lists["answers"])
+        settings["sessions_to_do"] = session_end(webdriver, settings["sessions_to_do"], settings["file"],
+                                                 lists["questions"], lists["answers"])
