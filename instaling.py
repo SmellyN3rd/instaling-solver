@@ -8,43 +8,13 @@ from selenium.common.exceptions import TimeoutException, ElementNotInteractableE
     UnexpectedAlertPresentException, NoSuchElementException
 import geckodriver_autoinstaller
 import configparser
+from selenium.webdriver.firefox.options import Options
 
 __author__ = "SmellyN3rd"
 
 
-def webdriver_generate():
-    geckodriver_autoinstaller.install()
-    profile = webdriver.FirefoxProfile()
-    profile.set_preference("media.volume_scale", "0.0")
-    return webdriver.Firefox(firefox_profile=profile)
-
-
-def read_words(file):
-    try:
-        lists = open(file, 'r').read().split('\n')
-        questions = lists[0].split(';')
-        answers = lists[1].split(';')
-        del questions[-1]
-        del answers[-1]
-        print("read " + str(len(questions)) + " words from file " + file)
-    except IOError:
-        questions = ['null']
-        answers = ['null']
-    return {"questions": questions, "answers": answers}
-
-
-def write_fiile(questions, answers, file):
-    open('geckodriver.log', 'w')
-    open(file, 'w')
-    for i in questions:
-        open(file, 'a').write(str(i) + ';')
-    open(file, 'a').write('\n')
-    for j in answers:
-        open(file, 'a').write(str(j) + ';')
-
-
-def argument_parse(driver):
-    parsed = {"username": "", "password": "", "file": "instaling.words", "sessions_to_do": 1}
+def argument_parse():
+    parsed = {"username": "", "password": "", "file": "instaling.words", "sessions_to_do": 1, "headless": False}
 
     if "--help" in argv:
         print("usage: " + argv[0] + " [options]\n")
@@ -53,7 +23,7 @@ def argument_parse(driver):
         print("--password   -p      yor instaling password")
         print("--sessions   -s      desired number of instaling sessions to complete")
         print("--file       -f      file with the saved instaling words")
-        print("--minimize   -m      start the program minimized")
+        print("--headless   -h      start the program without browser gui")
         print("--help               display this help message")
         exit()
     try:
@@ -79,8 +49,8 @@ def argument_parse(driver):
             parsed["sessions_to_do"] = int(argv[argument + 1])
         if "--file" == argv[argument] or "-f" == argv[argument]:
             parsed["file"] = argv[argument + 1]
-        if "--minimize" == argv[argument] or "-m" == argv[argument]:
-            driver.minimize_window()
+        if "--headless" == argv[argument] or "-h" == argv[argument]:
+            parsed["headless"] = True
 
     if parsed["username"] == "":
         print("please specify what user to use")
@@ -89,6 +59,39 @@ def argument_parse(driver):
         print("please type the password for the user " + parsed["username"])
         exit()
     return parsed
+
+
+def webdriver_generate(headless):
+    geckodriver_autoinstaller.install()
+    profile = webdriver.FirefoxProfile()
+    options = Options()
+    options.headless = headless
+    profile.set_preference("media.volume_scale", "0.0")
+    return webdriver.Firefox(firefox_profile=profile, options=options)
+
+
+def read_words(file):
+    try:
+        lists = open(file, 'r').read().split('\n')
+        questions = lists[0].split(';')
+        answers = lists[1].split(';')
+        del questions[-1]
+        del answers[-1]
+        print("read " + str(len(questions)) + " words from file " + file)
+    except IOError:
+        questions = ['null']
+        answers = ['null']
+    return {"questions": questions, "answers": answers}
+
+
+def write_fiile(questions, answers, file):
+    open('geckodriver.log', 'w')
+    open(file, 'w')
+    for i in questions:
+        open(file, 'a').write(str(i) + ';')
+    open(file, 'a').write('\n')
+    for j in answers:
+        open(file, 'a').write(str(j) + ';')
 
 
 def login(driver, username, password):
@@ -219,10 +222,10 @@ def answer(driver, questions, answers):
 
 
 if __name__ == "__main__":
-    webdriver = webdriver_generate()
-    settings = argument_parse(webdriver)
-    lists = read_words(settings["file"])
+    settings = argument_parse()
+    webdriver = webdriver_generate(settings["headless"])
     print("instaling solver by " + __author__)
+    lists = read_words(settings["file"])
     login(webdriver, settings["username"], settings["password"])
     while True:
         lists = answer(webdriver, lists["questions"], lists["answers"])
