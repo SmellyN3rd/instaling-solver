@@ -22,7 +22,7 @@ option        | description
 --password    -p    | password for the given account
 --sessions -s    | specify the amount of sessions to complete
 --file    -f        | specify the file to which to read/write to
---minimize    -m    | start the program with a minimized browser
+--headless    -h    | start the program in the headless mode
 
 # Showcase
 <img src="https://media.giphy.com/media/njjiYq0zcxNpkfeV02/giphy.gif" >
