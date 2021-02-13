@@ -7,15 +7,20 @@ instaling-solver is a small project that automates the process of answering [ins
 - [selenium](https://pypi.org/project/selenium/)
 - [firefox](https://www.mozilla.org/firefox/new/)
 
+## Installation
+`pip install instaling-solver`</br></br>
 
-## Usage
+or</br></br>
 
 `git clone https://github.com/SmellyN3rd/instaling-solver`</br></br>
 `cd instaling-solver`</br></br>
-`pip install -r requirements.txt`</br></br>
-`python instaling.py [options]`</br></br>
+`python setup.py install`</br></br>
+
+## Usage
+`python -m instaling-solver [options]`</br></br>
 
 ## Options
+
 option        | description
 ------------- | -------------
 --user    -u        | specify the instaling account to use
