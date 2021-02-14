@@ -10,13 +10,14 @@ import geckodriver_autoinstaller
 import configparser
 from selenium.webdriver.firefox.options import Options
 import os
+import tempfile
 
 __author__ = "SmellyN3rd"
 
 
 def argument_parse():
     parsed = {"username": "", "password": "", "file": "instaling.words", "sessions_to_do": 1, "headless": False}
-    path_to_main = argv[0].replace('__main__.py', '')
+    temp_dir = tempfile.gettempdir() + '/'
 
     if "--help" in argv:
         print("usage: " + argv[0] + " [options]\n")
@@ -30,7 +31,7 @@ def argument_parse():
         exit()
     try:
         config = configparser.ConfigParser()
-        config.read(path_to_main + "config.ini")
+        config.read(temp_dir + "config.ini")
         if "username" in config["settings"]:
             parsed["username"] = config["settings"]["username"]
         if "password" in config["settings"]:
@@ -70,12 +71,12 @@ def argument_parse():
         exit()
 
     if "-c" in argv or "--config" in argv:
-        open(path_to_main + 'config.ini', 'w').write('[settings]\n')
-        open(path_to_main + 'config.ini', 'a').write('username=' + parsed["username"])
-        open(path_to_main + 'config.ini', 'a').write('\npassword=' + parsed["password"])
-        open(path_to_main + 'config.ini', 'a').write('\nsessions_to_do=' + str(parsed["sessions_to_do"]))
-        open(path_to_main + 'config.ini', 'a').write('\nfile=' + parsed["file"])
-        open(path_to_main + 'config.ini', 'a').write('\nheadless=' + str(parsed["headless"]))
+        open(temp_dir + 'config.ini', 'w').write('[settings]\n')
+        open(temp_dir + 'config.ini', 'a').write('username=' + parsed["username"])
+        open(temp_dir + 'config.ini', 'a').write('\npassword=' + parsed["password"])
+        open(temp_dir + 'config.ini', 'a').write('\nsessions_to_do=' + str(parsed["sessions_to_do"]))
+        open(temp_dir + 'config.ini', 'a').write('\nfile=' + parsed["file"])
+        open(temp_dir + 'config.ini', 'a').write('\nheadless=' + str(parsed["headless"]))
     return parsed
 
 
