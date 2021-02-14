@@ -26,8 +26,9 @@ option        | description
 --user    -u        | specify the instaling account to use
 --password    -p    | password for the given account
 --sessions -s    | specify the amount of sessions to complete
---file    -f        | specify the file to which to read/write to
---headless    -h    | start the program in the headless mode
+--file    -f        | specify the file to which to read/write the known words
+--headless    -h    | toogle headless mode (without browser gui)
+--config    -c    | dump all settings into a file which will be loaded automaticly in the future
 
 # Showcase
 <img src="https://media.giphy.com/media/njjiYq0zcxNpkfeV02/giphy.gif" >
