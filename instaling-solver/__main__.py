@@ -9,12 +9,14 @@ from selenium.common.exceptions import TimeoutException, ElementNotInteractableE
 import geckodriver_autoinstaller
 import configparser
 from selenium.webdriver.firefox.options import Options
+import os
 
 __author__ = "SmellyN3rd"
 
 
 def argument_parse():
     parsed = {"username": "", "password": "", "file": "instaling.words", "sessions_to_do": 1, "headless": False}
+    path_to_main = argv[0].replace('__main__.py', '')
 
     if "--help" in argv:
         print("usage: " + argv[0] + " [options]\n")
@@ -28,7 +30,7 @@ def argument_parse():
         exit()
     try:
         config = configparser.ConfigParser()
-        config.read("config.ini")
+        config.read(path_to_main + "config.ini")
         if "username" in config["settings"]:
             parsed["username"] = config["settings"]["username"]
         if "password" in config["settings"]:
@@ -37,6 +39,11 @@ def argument_parse():
             parsed["sessions_to_do"] = int(config["settings"]["sessions_to_do"])
         if "file" in config["settings"]:
             parsed["file"] = config["settings"]["file"]
+        if "headless" in config["settings"]:
+            if config["settings"]["headless"] == "True":
+                parsed["headless"] = True
+            else:
+                parsed["headless"] = False
     except KeyError:
         pass
 
@@ -50,7 +57,10 @@ def argument_parse():
         if "--file" == argv[argument] or "-f" == argv[argument]:
             parsed["file"] = argv[argument + 1]
         if "--headless" == argv[argument] or "-h" == argv[argument]:
-            parsed["headless"] = True
+            if not parsed["headless"]:
+                parsed["headless"] = True
+            else:
+                parsed["headless"] = False
 
     if parsed["username"] == "":
         print("please specify what user to use")
@@ -58,6 +68,14 @@ def argument_parse():
     if parsed["password"] == "":
         print("please type the password for the user " + parsed["username"])
         exit()
+
+    if "-c" in argv or "--config" in argv:
+        open(path_to_main + 'config.ini', 'w').write('[settings]\n')
+        open(path_to_main + 'config.ini', 'a').write('username=' + parsed["username"])
+        open(path_to_main + 'config.ini', 'a').write('\npassword=' + parsed["password"])
+        open(path_to_main + 'config.ini', 'a').write('\nsessions_to_do=' + str(parsed["sessions_to_do"]))
+        open(path_to_main + 'config.ini', 'a').write('\nfile=' + parsed["file"])
+        open(path_to_main + 'config.ini', 'a').write('\nheadless=' + str(parsed["headless"]))
     return parsed
 
 
@@ -67,7 +85,7 @@ def webdriver_generate(headless):
     options = Options()
     options.headless = headless
     profile.set_preference("media.volume_scale", "0.0")
-    return webdriver.Firefox(firefox_profile=profile, options=options)
+    return webdriver.Firefox(firefox_profile=profile, options=options, service_log_path=os.devnull)
 
 
 def read_words(file):
@@ -85,7 +103,6 @@ def read_words(file):
 
 
 def write_fiile(questions, answers, file):
-    open('geckodriver.log', 'w')
     open(file, 'w')
     for i in questions:
         open(file, 'a').write(str(i) + '|')
