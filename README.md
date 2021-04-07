@@ -1,3 +1,6 @@
+![](https://img.shields.io/pypi/status/instaling-solver)
+![](https://img.shields.io/github/license/smellyn3rd/instaling-solver)
+
 ## About the project
 instaling-solver is a small project that automates the process of answering [instaling.pl](https://instaling.pl/) questions.
 
