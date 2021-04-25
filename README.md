@@ -34,4 +34,5 @@ option        | description
 --config    -c    | dump all settings into a file which will be loaded automaticly in the future
 
 # Showcase
-<img src="https://media.giphy.com/media/njjiYq0zcxNpkfeV02/giphy.gif" >
+![instaling](https://user-images.githubusercontent.com/70511617/115993222-2ce74000-a5d2-11eb-842d-13b63abee105.gif)
+
