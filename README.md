@@ -26,12 +26,12 @@ or</br></br>
 
 option        | description
 ------------- | -------------
---user    -u        | specify the instaling account to use
---password    -p    | password for the given account
---sessions -s    | specify the amount of sessions to complete
---file    -f        | specify the file to which to read/write the known words
+--user    -u        | Your instaling username
+--password    -p    | Your instaling password
+--sessions -s    | desired number of instaling sessions to complete
+--file    -f        | file with the saved instaling words
+--delay    -d        | delay in seconds before answering each question
 --headless    -h    | toogle headless mode (without browser gui)
---config    -c    | dump all settings into a file which will be loaded automaticly in the future
 
 # Showcase
 ![instaling](https://user-images.githubusercontent.com/70511617/115993222-2ce74000-a5d2-11eb-842d-13b63abee105.gif)

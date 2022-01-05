@@ -7,6 +7,7 @@ from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException, ElementNotInteractableException
 from selenium.webdriver.firefox.options import Options
 import geckodriver_autoinstaller
+from time import sleep
 
 
 def argument_parse():
@@ -16,15 +17,17 @@ def argument_parse():
         "file": "instaling.words",
         "sessions_to_do": 1,
         "headless": False,
+        "delay": 0,
     }
 
     if "--help" in argv:
         print("usage: " + argv[0] + " [options]\n")
         print("options:")
-        print("--user       -f      your instaling username")
-        print("--password   -p      yor instaling password")
+        print("--user       -f      Your instaling username")
+        print("--password   -p      Your instaling password")
         print("--sessions   -s      desired number of instaling sessions to complete")
         print("--file       -f      file with the saved instaling words")
+        print("--delay      -d      delay in seconds before answering each question")
         print("--headless   -h      start the program without browser gui")
         print("--help               display this help message")
         exit()
@@ -38,6 +41,8 @@ def argument_parse():
             parsed["sessions_to_do"] = int(argv[argument + 1])
         if "--file" == argv[argument] or "-f" == argv[argument]:
             parsed["file"] = argv[argument + 1]
+        if "--delay" == argv[argument] or "-d" == argv[argument]:
+            parsed["delay"] = int(argv[argument + 1])
         if "--headless" == argv[argument] or "-h" == argv[argument]:
             if not parsed["headless"]:
                 parsed["headless"] = True
@@ -156,11 +161,12 @@ def get_index(questions, question):
     return False
 
 
-def answer(driver, questions, answers):
+def answer(driver, questions, answers, answer_delay):
     WebDriverWait(driver, 5).until(ec.presence_of_element_located((By.ID, "answer")))
     question_text = question(driver)
     answer_index = get_index(questions, question_text)
 
+    sleep(answer_delay)
     if answer_index:
         print(
             "Answered: "
@@ -222,7 +228,9 @@ if __name__ == "__main__":
     login(webdriver, settings["username"], settings["password"])
     while True:
         try:
-            lists = answer(webdriver, lists["questions"], lists["answers"])
+            lists = answer(
+                webdriver, lists["questions"], lists["answers"], settings["delay"]
+            )
         except (ElementNotInteractableException, TimeoutException):
             dismiss_popup(webdriver)
             if webdriver.find_element(By.ID, "return_mainpage").is_displayed():
