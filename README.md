@@ -4,35 +4,28 @@
 ## About the project
 instaling-solver is a small project that automates the process of answering [instaling.pl](https://instaling.pl/) questions.
 
+## Prerequisites
+- [Firefox](https://www.mozilla.org/firefox/new/) or [Chromium](https://www.chromium.org/getting-involved/download-chromium/) based browser
+- [Geckodriver](https://github.com/mozilla/geckodriver/releases) (For Firefox) or [Chromedriver](https://chromedriver.chromium.org/downloads) (For Chromium)
 
-## dependencies
-- [geckodriver-autoinstaller](https://pypi.org/project/geckodriver-autoinstaller/)
-- [selenium](https://pypi.org/project/selenium/)
-- [firefox](https://www.mozilla.org/firefox/new/)
+## Dependencies
+- [Selenium](https://pypi.org/project/selenium/)
 
 ## Installation
-`pip install instaling-solver`</br></br>
+Download a webdriver for your browser and copy it to path (for example `C:\Windows` or `/bin`)
 
-or</br></br>
-
-`git clone https://github.com/SmellyN3rd/instaling-solver`</br></br>
-`cd instaling-solver`</br></br>
-`python setup.py install`</br></br>
+`pip install instaling-solver`
 
 ## Usage
-`python -m instaling-solver [options]`</br></br>
+`python -m instaling-solver [options]`
 
 ## Options
 
 option        | description
 ------------- | -------------
---user    -u        | Your instaling username
---password    -p    | Your instaling password
+--user    -u        | your instaling username
+--password    -p    | your instaling password
 --sessions -s    | desired number of instaling sessions to complete
 --file    -f        | file with the saved instaling words
 --delay    -d        | delay in seconds before answering each question
 --headless    -h    | toogle headless mode (without browser gui)
-
-# Showcase
-![instaling](https://user-images.githubusercontent.com/70511617/115993222-2ce74000-a5d2-11eb-842d-13b63abee105.gif)
-

@@ -1,3 +1,1 @@
-geckodriver-autoinstaller
 selenium
-urllib3
